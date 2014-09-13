@@ -1,11 +1,12 @@
-module Utils (print64, randoms64, linToRF, rfToLin, random64ToSquare) where
+module Utils (print64, randoms64, linToRF, rfToLin, random64ToSquare, bitScanForward) where
 
 import Types
 import Data.Bits
 import System.Random as Rand
+import Data.Array.Unboxed as UArray
 
 linToRF :: Int -> (Int, Int)
-linToRF sq = quotRem sq 8--(sq `quot` 8, sq `rem` 8)
+linToRF sq = quotRem sq 8
 
 rfToLin :: Int -> Int -> Int
 rfToLin rank file = rank*8 + file
@@ -38,3 +39,18 @@ fromRandoms :: [Int] -> [BB]
 fromRandoms (a:b:c:xs) = (    (fromIntegral a) 
 	                      .|. (shiftL (fromIntegral b) 30)
                           .|. (shiftL (fromIntegral c) 60) ):(fromRandoms xs)
+
+index64 :: UArray BB Int
+index64 = UArray.listArray (0,63) [0,  1, 48,  2, 57, 49, 28,  3,
+                                   61, 58, 50, 42, 38, 29, 17,  4,
+                                   62, 55, 59, 36, 53, 51, 43, 22,
+                                   45, 39, 33, 30, 24, 18, 12,  5,
+                                   63, 47, 56, 27, 60, 41, 37, 16,
+                                   54, 35, 52, 21, 44, 32, 23, 11,
+                                   46, 26, 40, 15, 34, 20, 31, 10,
+                                   25, 14, 19,  9, 13,  8,  7,  6]
+
+bitScanForward :: BB -> Int
+bitScanForward bb = let debruijn64 = 0x03f79d71b4cb0a89 :: BB
+                    in index64 UArray.! (((bb .&. (-bb)) * debruijn64) `shiftR` 58)
+
