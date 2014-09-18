@@ -1,9 +1,24 @@
-module Utils (print64, randoms64, linToRF, rfToLin, random64ToSquare, bitScanForward) where
+module Utils 
+(time, print64, randoms64, linToRF, rfToLin, random64ToSquare, bitScanForward, sparseRand)
+where
 
 import Types
 import Data.Bits
 import System.Random as Rand
 import Data.Array.Unboxed as UArray
+import Text.Printf
+import Control.Exception
+import System.CPUTime
+ 
+ -- from http://www.haskell.org/haskellwiki/Timing_computations
+time :: IO t -> IO t
+time a = do
+    start <- getCPUTime
+    v <- a
+    end   <- getCPUTime
+    let diff = (fromIntegral (end - start)) / (10^12)
+    printf "Computation time: %0.3f sec\n" (diff :: Double)
+    return v
 
 linToRF :: Int -> (Int, Int)
 linToRF sq = quotRem sq 8
@@ -39,6 +54,12 @@ fromRandoms :: [Int] -> [BB]
 fromRandoms (a:b:c:xs) = (    (fromIntegral a) 
 	                      .|. (shiftL (fromIntegral b) 30)
                           .|. (shiftL (fromIntegral c) 60) ):(fromRandoms xs)
+
+sparseRand :: StdGen -> (BB, StdGen)
+sparseRand gen = let (r1,g1) = (Rand.random gen) :: (BB, StdGen)
+                     (r2,g2) = (Rand.random g1) :: (BB, StdGen)
+                     (r3,g3) = (Rand.random g2) :: (BB, StdGen)
+                 in (r1 .&. r2 .&. r3, g3)
 
 index64 :: UArray BB Int
 index64 = UArray.listArray (0,63) [0,  1, 48,  2, 57, 49, 28,  3,
