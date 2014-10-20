@@ -7,6 +7,7 @@ rookMasks,
 genMagic,
 magicBishopMoves,
 magicRookMoves,
+magicQueenMoves,
 bishopMagics,
 rookMagics,
 getRookMask
@@ -36,6 +37,9 @@ magicRookMoves occ sq =
                               opm = om * magic
                               ind = (fromIntegral $ opm `unsafeShiftR` shift)::Int
                           in lookup UArray.! ind
+
+magicQueenMoves :: BB -> Int -> BB
+magicQueenMoves occ sq = (magicBishopMoves occ sq) .|. (magicRookMoves occ sq)
 
 bishopMagics :: Array Int MagicEntry
 bishopMagics = Array.listArray (0,63) [genMagic True i | i <- [0..63]]
