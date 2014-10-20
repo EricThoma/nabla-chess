@@ -8,18 +8,19 @@ import System.CPUTime
 import Criterion.Main
 
 main :: IO ()
-main = let seed = 53534523
+main = let seed = 535345232
            (occ,gen) = sparseRand (Rand.mkStdGen $ fromIntegral seed)
-       in do print magics
-       	     defaultMain [ bench "bishop moves" $ nf (magicBishopMoves occ) 32 ]
-
+       in do testMagic
+             --print rookMagics
+       	     --defaultMain [ bench "rook moves" $ nf (magicRookMoves occ) 32 ]
+             
 testMagic :: IO ()
 testMagic = do seed <- getCPUTime
-               let --entry = genMagic True 5
+               let
                    (occ,gen) = sparseRand (Rand.mkStdGen $ fromIntegral seed)
-                   mask = bishopMasks UArray.! 36
+                   mask = rookMasks UArray.! 36
                print64 occ
-               print64 (magicBishopMoves occ 36)
+               print64 (magicRookMoves occ 36)
 
 testOccs :: Int -> IO ()
 testOccs sq = let mask = bishopMasks UArray.! sq
