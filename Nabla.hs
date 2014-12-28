@@ -13,14 +13,22 @@ main = let seed = 535345232
        in do testMagic
              --print rookMagics
        	     --defaultMain [ bench "rook moves" $ nf (magicRookMoves occ) 32 ]
-             
+       
 testMagic :: IO ()
-testMagic = do seed <- getCPUTime
+testMagic = do let seed = 50343 -- <- getCPUTime
                let
-                   (occ,gen) = sparseRand (Rand.mkStdGen $ fromIntegral seed)
-                   mask = rookMasks UArray.! 36
+                   (opocc,gen) = sparseRand (Rand.mkStdGen $ fromIntegral seed)
+                   (occ1,gen1) = sparseRand gen
+                   selfocc = occ1 .&. (complement opocc)
+                   occ = selfocc .|. opocc
+                   mask = rookMasks UArray.! 28
+
                print64 occ
-               print64 (magicRookMoves occ 36)
+               print64 opocc
+               print64 selfocc
+               --print64 $ complement occ
+               print64 $ magicQueenMoves opocc 28
+               --print64 (genMove occ opocc 28)
 
 testOccs :: Int -> IO ()
 testOccs sq = let mask = bishopMasks UArray.! sq
